@@ -3,6 +3,31 @@ let currentTabIndex = 0
 let undoStack = []
 let redoStack = []
 
+/* ===== 全局 API Key 配置弹窗 ===== */
+window.openApiKeyConfig = function() {
+  const modal = document.getElementById('gs-apikey-modal')
+  if (!modal) return
+  // 加载已保存的 Key
+  const deepseekKey = localStorage.getItem('gs_deepseek_key') || ''
+  const kimiKey = localStorage.getItem('gs_kimi_key') || ''
+  const dkInput = document.getElementById('gs-apikey-deepseek')
+  const kmInput = document.getElementById('gs-apikey-kimi')
+  if (dkInput) dkInput.value = deepseekKey
+  if (kmInput) kmInput.value = kimiKey
+  // 更新状态显示
+  const dkStatus = document.getElementById('gs-apikey-deepseek-status')
+  const kmStatus = document.getElementById('gs-apikey-kimi-status')
+  if (dkStatus) {
+    dkStatus.textContent = deepseekKey ? '✅ 已配置' : '未配置'
+    dkStatus.style.color = deepseekKey ? 'var(--accent)' : 'var(--text-muted)'
+  }
+  if (kmStatus) {
+    kmStatus.textContent = kimiKey ? '✅ 已配置' : '未配置'
+    kmStatus.style.color = kimiKey ? 'var(--accent)' : 'var(--text-muted)'
+  }
+  modal.classList.remove('gs-hidden')
+}
+
 /* ===== DOM 引用 ===== */
 const $ = id => document.getElementById(id)
 const input = $('gs-input')
@@ -1133,13 +1158,10 @@ a { color: #5A6AAA !important; }`
 
   // API Key 配置
   $('gs-mode-badge')?.addEventListener('click', () => {
-    // 点击模式徽章打开 API Key 配置
-    loadApiKeyConfig()
-    $('#gs-apikey-modal')?.classList.remove('gs-hidden')
+    window.openApiKeyConfig()
   })
   $('gs-apikey-btn')?.addEventListener('click', () => {
-    loadApiKeyConfig()
-    $('#gs-apikey-modal')?.classList.remove('gs-hidden')
+    window.openApiKeyConfig()
   })
   $('gs-apikey-close')?.addEventListener('click', () => $('#gs-apikey-modal')?.classList.add('gs-hidden'))
   $('gs-apikey-save')?.addEventListener('click', () => {
@@ -1158,21 +1180,6 @@ a { color: #5A6AAA !important; }`
       $('#gs-apikey-status').textContent = '保存失败：' + e.message
     }
   })
-  function loadApiKeyConfig() {
-    const deepseekKey = localStorage.getItem('gs_deepseek_key') || ''
-    const kimiKey = localStorage.getItem('gs_kimi_key') || ''
-    if ($('gs-apikey-deepseek')) $('gs-apikey-deepseek').value = deepseekKey
-    if ($('gs-apikey-kimi')) $('gs-apikey-kimi').value = kimiKey
-    // 显示状态
-    if ($('gs-apikey-deepseek-status')) {
-      $('gs-apikey-deepseek-status').textContent = deepseekKey ? '✅ 已配置' : '未配置'
-      $('gs-apikey-deepseek-status').style.color = deepseekKey ? 'var(--accent)' : 'var(--text-muted)'
-    }
-    if ($('gs-apikey-kimi-status')) {
-      $('gs-apikey-kimi-status').textContent = kimiKey ? '✅ 已配置' : '未配置'
-      $('gs-apikey-kimi-status').style.color = kimiKey ? 'var(--accent)' : 'var(--text-muted)'
-    }
-  }
 
   // 导出 PDF
   $('gs-pdf-btn')?.addEventListener('click', exportPDF)
@@ -1247,9 +1254,6 @@ a { color: #5A6AAA !important; }`
     clearTimeout(saveDraftTimer)
     saveDraftTimer = setTimeout(saveDraft, 500)
   })
-
-  // 初始化 API Key 配置状态
-  loadApiKeyConfig()
 })
 
 /* ===== 粘贴图片 / Excel 表格 / HTML 智能检测 ===== */
