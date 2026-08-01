@@ -28,6 +28,39 @@ window.openApiKeyConfig = function() {
   modal.classList.remove('gs-hidden')
 }
 
+/* ===== 全局保存 API Key ===== */
+window.saveApiKeyConfig = function() {
+  const deepseekKey = document.getElementById('gs-apikey-deepseek')?.value?.trim() || ''
+  const kimiKey = document.getElementById('gs-apikey-kimi')?.value?.trim() || ''
+  try {
+    localStorage.setItem('gs_deepseek_key', deepseekKey)
+    localStorage.setItem('gs_kimi_key', kimiKey)
+    const status = document.getElementById('gs-apikey-status')
+    if (status) {
+      status.textContent = '✅ 已保存到本地'
+      status.style.color = '#07C160'
+    }
+    // 更新状态显示
+    const dkStatus = document.getElementById('gs-apikey-deepseek-status')
+    const kmStatus = document.getElementById('gs-apikey-kimi-status')
+    if (dkStatus) {
+      dkStatus.textContent = deepseekKey ? '✅ 已配置' : '未配置'
+      dkStatus.style.color = deepseekKey ? '#07C160' : '#999'
+    }
+    if (kmStatus) {
+      kmStatus.textContent = kimiKey ? '✅ 已配置' : '未配置'
+      kmStatus.style.color = kimiKey ? '#07C160' : '#999'
+    }
+    setTimeout(() => {
+      if (status) status.textContent = ''
+      document.getElementById('gs-apikey-modal')?.classList.add('gs-hidden')
+    }, 1500)
+  } catch (e) {
+    const status = document.getElementById('gs-apikey-status')
+    if (status) status.textContent = '保存失败：' + e.message
+  }
+}
+
 /* ===== DOM 引用 ===== */
 const $ = id => document.getElementById(id)
 const input = $('gs-input')
