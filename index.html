@@ -498,8 +498,9 @@
       </select>
     </div>
     <span class="gs-tb-sep"></span>
-    <button id="gs-import-btn" class="gs-tb-btn" title="导入 .md 文件">&#x1F4C2; 导入</button>
-    <label id="gs-import-label" style="display:none;"><input type="file" id="gs-file-input" accept=".md" /></label>
+    <button id="gs-html-import-btn" class="gs-tb-btn" title="粘贴 HTML 转 Markdown">&#x1F4C4; HTML</button>
+    <button id="gs-import-btn" class="gs-tb-btn" title="导入 .md / .txt 文件">&#x1F4C2; 导入</button>
+    <label id="gs-import-label" style="display:none;"><input type="file" id="gs-file-input" accept=".md,.txt" /></label>
     <button id="gs-toc-btn" class="gs-tb-btn" title="生成目录">&#x1F4CB; 目录</button>
     <button id="gs-draft-btn" class="gs-tb-btn" title="多草稿管理">&#x1F4DD; 草稿</button>
     <span class="gs-tb-sep"></span>
@@ -518,7 +519,7 @@
     <div class="gs-panel gs-panel-left">
       <div class="gs-panel-header">
         Markdown
-        <span class="text-xs font-normal text-gray-400">支持 GFM 语法、粘贴图片、粘贴 Excel</span>
+        <span class="text-xs font-normal text-gray-400">支持 GFM 语法、粘贴图片、粘贴 Excel、HTML 转 Markdown</span>
       </div>
       <div class="gs-editor-wrap">
         <div id="gs-line-nums" class="gs-line-nums"></div>
@@ -647,6 +648,28 @@
   </div>
 
   </div><!-- /.gs-app -->
+
+  <!-- ===== HTML 导入弹窗 ===== -->
+  <div id="gs-html-modal" class="gs-modal-overlay gs-hidden">
+    <div class="gs-modal" style="max-width:660px;">
+      <h2>&#x1F4C4; HTML 转 Markdown</h2>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">
+        从网页复制内容（Ctrl+C），粘贴到下方文本框，点击「转为 Markdown」即可自动转换。
+      </p>
+      <textarea id="gs-html-source" class="gs-editor" style="height:200px;font-size:13px;border:1px solid var(--border);border-radius:6px;resize:vertical;font-family:'JetBrains Mono',monospace;" placeholder="在此粘贴 HTML 内容...&#10;&#10;或者直接 Ctrl+V 粘贴网页内容，会自动检测 HTML"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+        <button id="gs-html-convert-btn" class="gs-tb-btn gs-btn-primary" style="padding:0 20px;">转为 Markdown</button>
+        <button id="gs-html-paste-btn" class="gs-tb-btn" title="从剪贴板粘贴">&#x1F4CB; 粘贴</button>
+        <button id="gs-html-insert-btn" class="gs-tb-btn" style="display:none;" title="插入到编辑区">&#x21E7; 插入编辑区</button>
+        <span id="gs-html-status" style="font-size:12px;color:var(--text-muted);"></span>
+        <button id="gs-html-close" class="gs-tb-btn" style="margin-left:auto;">关闭</button>
+      </div>
+      <div id="gs-html-result-wrap" style="display:none;margin-top:10px;">
+        <p style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">转换结果预览：</p>
+        <textarea id="gs-html-result" class="gs-editor" style="height:150px;font-size:13px;border:1px solid var(--border);border-radius:6px;resize:vertical;font-family:'JetBrains Mono',monospace;" readonly></textarea>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="./app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>

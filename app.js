@@ -952,6 +952,7 @@ a { color: #5A6AAA !important; }`
       $('gs-history-panel')?.classList.add('gs-hidden')
       $('gs-draft-modal')?.classList.add('gs-hidden')
       $('gs-ai-modal')?.classList.add('gs-hidden')
+      $('gs-html-modal')?.classList.add('gs-hidden')
       $('gs-shortcut-settings-modal')?.classList.add('gs-hidden')
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.target.id === 'gs-preview') {
@@ -1004,7 +1005,7 @@ a { color: #5A6AAA !important; }`
     }
   })
 
-  // 导入 .md 文件
+  // 导入 .md / .txt 文件
   $('gs-import-btn')?.addEventListener('click', () => $('gs-file-input')?.click())
   $('gs-file-input')?.addEventListener('change', e => {
     const file = e.target.files[0]
@@ -1013,6 +1014,64 @@ a { color: #5A6AAA !important; }`
     reader.onload = () => { input.value = reader.result; updateStats(); syncLineNumbers() }
     reader.readAsText(file, 'utf-8')
     e.target.value = ''
+  })
+
+  // HTML 转 Markdown
+  $('gs-html-import-btn')?.addEventListener('click', () => {
+    $('#gs-html-modal')?.classList.remove('gs-hidden')
+    $('#gs-html-result-wrap')?.style.setProperty('display', 'none')
+    $('#gs-html-insert-btn')?.style.setProperty('display', 'none')
+    $('#gs-html-source').value = ''
+    $('#gs-html-result').value = ''
+    $('#gs-html-status').textContent = ''
+  })
+  $('gs-html-close')?.addEventListener('click', () => $('#gs-html-modal')?.classList.add('gs-hidden'))
+  $('gs-html-paste-btn')?.addEventListener('click', async () => {
+    try {
+      const text = await navigator.clipboard.readText()
+      if (text) {
+        $('#gs-html-source').value = text
+        $('#gs-html-status').textContent = '已粘贴，共 ' + text.length + ' 字符'
+      } else {
+        $('#gs-html-status').textContent = '剪贴板为空'
+      }
+    } catch (e) {
+      $('#gs-html-status').textContent = '无法读取剪贴板，请手动粘贴'
+    }
+  })
+  $('gs-html-convert-btn')?.addEventListener('click', async () => {
+    const source = $('#gs-html-source')?.value?.trim()
+    if (!source) { $('#gs-html-status').textContent = '请先粘贴 HTML 内容'; return }
+    const btn = $('gs-html-convert-btn')
+    const orig = btn.textContent
+    btn.textContent = '转换中...'
+    btn.disabled = true
+    try {
+      const { htmlToMarkdown } = await import('./utils/htmlToMarkdown.js')
+      const result = htmlToMarkdown(source)
+      if (!result || !result.trim()) {
+        $('#gs-html-status').textContent = '转换结果为空，请检查 HTML 内容'
+        return
+      }
+      $('#gs-html-result').value = result
+      $('#gs-html-result-wrap')?.style.setProperty('display', 'block')
+      $('#gs-html-insert-btn')?.style.setProperty('display', 'inline-flex')
+      $('#gs-html-status').textContent = '转换成功！共 ' + result.length + ' 字符'
+    } catch (e) {
+      $('#gs-html-status').textContent = '转换失败：' + e.message
+    } finally {
+      btn.textContent = orig
+      btn.disabled = false
+    }
+  })
+  $('gs-html-insert-btn')?.addEventListener('click', () => {
+    const result = $('#gs-html-result')?.value
+    if (result) {
+      input.value = input.value ? input.value + '\n\n' + result : result
+      updateStats()
+      syncLineNumbers()
+      $('#gs-html-modal')?.classList.add('gs-hidden')
+    }
   })
 
   // 生成目录
