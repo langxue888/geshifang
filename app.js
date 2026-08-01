@@ -1199,10 +1199,70 @@ a { color: #5A6AAA !important; }`
   })
 })
 
-/* ===== 粘贴图片 / Excel 表格 ===== */
-input.addEventListener('paste', function (e) {
+/* ===== 粘贴图片 / Excel 表格 / HTML 智能检测 ===== */
+input.addEventListener('paste', async function (e) {
   const items = e.clipboardData?.items
   if (!items) return
+
+  // 检测 HTML 内容（来自网页复制）
+  let htmlContent = null
+  for (const item of items) {
+    if (item.type === 'text/html') {
+      htmlContent = item
+      break
+    }
+  }
+
+  // 如果检测到 HTML，弹出提示询问是否转为 Markdown
+  if (htmlContent) {
+    // 检查是否同时有图片，如果有图片则不干扰图片粘贴
+    let hasImage = false
+    for (const item of items) {
+      if (item.type.startsWith('image/')) { hasImage = true; break }
+    }
+    // 纯图片粘贴不干扰
+    if (hasImage) {
+      let allImg = true
+      for (const item of items) {
+        if (!item.type.startsWith('image/')) { allImg = false; break }
+      }
+      if (allImg) return // 让后面的图片粘贴逻辑处理
+    }
+
+    e.preventDefault()
+    const html = await new Promise(resolve => htmlContent.getAsString(resolve))
+
+    // 简单判断：HTML 内容太短可能不是网页内容
+    if (html.length < 50) {
+      // 内容太短，走默认粘贴
+      document.execCommand('insertText', false, e.clipboardData.getData('text/plain'))
+      return
+    }
+
+    // 弹出自定义确认框
+    const convert = confirm('📄 检测到网页内容，是否转为 Markdown？\n\n点击「确定」→ 转为 Markdown\n点击「取消」→ 直接粘贴纯文本')
+    if (convert) {
+      try {
+        const { htmlToMarkdown } = await import('./utils/htmlToMarkdown.js')
+        const markdown = htmlToMarkdown(html)
+        if (markdown && markdown.trim()) {
+          input.setRangeText(markdown, input.selectionStart, input.selectionEnd, 'end')
+          updateStats()
+          syncLineNumbers()
+        } else {
+          // 转换结果为空，粘贴纯文本
+          document.execCommand('insertText', false, e.clipboardData.getData('text/plain'))
+        }
+      } catch (err) {
+        // 转换失败，粘贴纯文本
+        document.execCommand('insertText', false, e.clipboardData.getData('text/plain'))
+      }
+    } else {
+      // 用户选择取消，粘贴纯文本
+      document.execCommand('insertText', false, e.clipboardData.getData('text/plain'))
+    }
+    return
+  }
 
   const images = []
   const texts = []
