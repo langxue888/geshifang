@@ -405,6 +405,10 @@
     <h1><span class="gs-brand">格式坊</span> <span class="gs-sub">WeChat Formatter</span></h1>
     <div class="gs-header-actions">
       <span id="gs-mode-badge" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,158,11,0.12);color:#B45309;font-weight:500;">&#x1F4E1; 本地</span>
+      <select id="gs-model-select" class="gs-tb-btn" style="font-size:11px;padding:0 6px;cursor:pointer;max-width:100px;display:none;" title="选择 AI 模型">
+        <option value="deepseek">DeepSeek</option>
+        <option value="kimi">Kimi</option>
+      </select>
       <span class="gs-tb-sep"></span>
       <button id="gs-history-btn" class="gs-tb-btn gs-tb-lg" title="历史版本" style="position:relative;">&#x1F550;</button>
       <button id="gs-theme-btn" class="gs-tb-btn gs-tb-lg" title="深色/浅色主题">&#x1F319;</button>
@@ -633,6 +637,44 @@
       <div style="display:flex;gap:8px;margin-top:8px;">
         <button id="gs-ai-apply" class="gs-tb-btn" title="将结果插入到编辑区">&#x21E7; 应用到编辑区</button>
         <button id="gs-ai-close" class="gs-tb-btn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== API Key 配置弹窗 ===== -->
+  <div id="gs-apikey-modal" class="gs-modal-overlay gs-hidden">
+    <div class="gs-modal" style="max-width:520px;">
+      <h2>&#x1F512; AI 模型配置</h2>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">配置 API Key 后可使用 AI 排版和 AI 辅助功能。至少配置一个模型即可。</p>
+
+      <div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-weight:600;font-size:14px;">DeepSeek</span>
+          <span style="font-size:11px;color:var(--text-muted);">api.deepseek.com</span>
+        </div>
+        <input id="gs-apikey-deepseek" type="password" class="gs-editor" style="width:100%;height:36px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;" placeholder="sk-..." />
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span id="gs-apikey-deepseek-status" style="font-size:11px;color:var(--text-muted);"></span>
+          <a href="https://platform.deepseek.com/" target="_blank" style="font-size:11px;color:var(--primary-light);">获取 Key →</a>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-weight:600;font-size:14px;">Kimi (Moonshot)</span>
+          <span style="font-size:11px;color:var(--text-muted);">api.moonshot.cn</span>
+        </div>
+        <input id="gs-apikey-kimi" type="password" class="gs-editor" style="width:100%;height:36px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;" placeholder="sk-..." />
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span id="gs-apikey-kimi-status" style="font-size:11px;color:var(--text-muted);"></span>
+          <a href="https://platform.moonshot.cn/" target="_blank" style="font-size:11px;color:var(--primary-light);">获取 Key →</a>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="gs-apikey-save" class="gs-tb-btn gs-btn-primary" style="padding:0 20px;">保存配置</button>
+        <span id="gs-apikey-status" style="font-size:12px;color:var(--text-muted);"></span>
+        <button id="gs-apikey-close" class="gs-tb-btn" style="margin-left:auto;">关闭</button>
       </div>
     </div>
   </div>

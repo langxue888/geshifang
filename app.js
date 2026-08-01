@@ -171,36 +171,10 @@ function importTemplates() {
 
 /* ===== AI 改写 ===== */
 async function aiRewrite(text, action) {
-  const actionPrompts = {
-    polish: '请润色以下文字，优化表达、修正语病，保持原意不变：\n\n',
-    expand: '请扩写以下文字，丰富内容、增加细节、保持风格一致：\n\n',
-    shorten: '请缩写以下文字，提炼核心内容，保留关键信息：\n\n',
-    'translate-en': '请将以下文字翻译为英文：\n\n',
-    'translate-ja': '请将以下文字翻译为日文：\n\n',
-    'translate-ko': '请将以下文字翻译为韩文：\n\n',
-  }
-  const prompt = (actionPrompts[action] || actionPrompts.polish) + text
-  try {
-    const { default: apiConfig } = await import('./config/apiConfig.js')
-    const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiConfig.BACKEND_API_KEY}` },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          { role: 'system', content: '你是一个专业的文字编辑助手。请根据用户要求处理文字，直接返回处理结果，不要添加解释或额外内容。' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: 0.3,
-        max_tokens: 4096,
-      }),
-    })
-    if (!res.ok) throw new Error(`API 请求失败 (${res.status})`)
-    const data = await res.json()
-    return data.choices?.[0]?.message?.content?.trim() || ''
-  } catch (e) {
-    throw new Error('AI 处理失败: ' + e.message)
-  }
+  const { aiRewrite: aiRewriteFn } = await import('./utils/aiClient.js')
+  const modelSelect = $('gs-model-select')
+  const modelId = modelSelect?.value || 'deepseek'
+  return aiRewriteFn(text, action, modelId)
 }
 
 /* ===== 样式模板 ===== */
@@ -285,19 +259,51 @@ async function applyFormat() {
     const { preprocessText } = await import('./utils/textProcessor.js')
     text = preprocessText(text)
 
-    const { hasApiKey } = await import('./utils/deepseekClient.js')
+    const { hasApiKey } = await import('./utils/aiClient.js')
     const badge = $('gs-mode-badge')
+    const modelSelect = $('gs-model-select')
 
-    if (hasApiKey()) {
-      badge.textContent = 'AI'
-      badge.className = 'gs-tb-btn text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium'
-      const { formatWithAI } = await import('./utils/deepseekClient.js')
-      let result = await formatWithAI(text)
+    // 检查是否有任一模型可用
+    const deepseekAvailable = hasApiKey('deepseek')
+    const kimiAvailable = hasApiKey('kimi')
+    const anyAiAvailable = deepseekAvailable || kimiAvailable
+
+    if (anyAiAvailable) {
+      // 显示模型选择器
+      if (modelSelect) {
+        modelSelect.style.display = 'inline-flex'
+        // 只显示已配置的模型
+        const currentVal = modelSelect.value
+        modelSelect.innerHTML = ''
+        if (deepseekAvailable) {
+          const opt = document.createElement('option')
+          opt.value = 'deepseek'; opt.textContent = 'DeepSeek'
+          modelSelect.appendChild(opt)
+        }
+        if (kimiAvailable) {
+          const opt = document.createElement('option')
+          opt.value = 'kimi'; opt.textContent = 'Kimi'
+          modelSelect.appendChild(opt)
+        }
+        // 恢复选中
+        if ([...modelSelect.options].some(o => o.value === currentVal)) {
+          modelSelect.value = currentVal
+        }
+      }
+
+      const selectedModel = modelSelect?.value || 'deepseek'
+      badge.textContent = `AI · ${selectedModel === 'kimi' ? 'Kimi' : 'DeepSeek'}`
+      badge.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(99,102,241,0.12);color:#6366F1;font-weight:500;'
+
+      const { formatWithAI } = await import('./utils/aiClient.js')
+      let result = await formatWithAI(text, selectedModel)
       if (!result || !result.trim()) result = '<p>AI 返回为空，请重试</p>'
       preview.innerHTML = injectStatsAfterTitle(result)
     } else {
       badge.innerHTML = '&#x1F4E1; 本地'
       badge.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(245,158,11,0.12);color:#B45309;font-weight:500;'
+      if (modelSelect) modelSelect.style.display = 'none'
+
       const { formatLocally } = await import('./utils/localFormatter.js')
       const headerBg = headerBgPicker.value || '#1A3C6D'
       const h1c = h1Color.value
@@ -953,6 +959,7 @@ a { color: #5A6AAA !important; }`
       $('gs-draft-modal')?.classList.add('gs-hidden')
       $('gs-ai-modal')?.classList.add('gs-hidden')
       $('gs-html-modal')?.classList.add('gs-hidden')
+      $('gs-apikey-modal')?.classList.add('gs-hidden')
       $('gs-shortcut-settings-modal')?.classList.add('gs-hidden')
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.target.id === 'gs-preview') {
@@ -1124,6 +1131,45 @@ a { color: #5A6AAA !important; }`
   })
   $('gs-ai-close')?.addEventListener('click', () => $('#gs-ai-modal')?.classList.add('gs-hidden'))
 
+  // API Key 配置
+  $('gs-mode-badge')?.addEventListener('dblclick', () => {
+    // 双击模式徽章打开 API Key 配置
+    loadApiKeyConfig()
+    $('#gs-apikey-modal')?.classList.remove('gs-hidden')
+  })
+  $('gs-apikey-close')?.addEventListener('click', () => $('#gs-apikey-modal')?.classList.add('gs-hidden'))
+  $('gs-apikey-save')?.addEventListener('click', () => {
+    const deepseekKey = $('#gs-apikey-deepseek')?.value?.trim()
+    const kimiKey = $('#gs-apikey-kimi')?.value?.trim()
+    try {
+      localStorage.setItem('gs_deepseek_key', deepseekKey || '')
+      localStorage.setItem('gs_kimi_key', kimiKey || '')
+      $('#gs-apikey-status').textContent = '✅ 已保存到本地'
+      $('#gs-apikey-status').style.color = 'var(--accent)'
+      setTimeout(() => {
+        $('#gs-apikey-status').textContent = ''
+        $('#gs-apikey-modal')?.classList.add('gs-hidden')
+      }, 1500)
+    } catch (e) {
+      $('#gs-apikey-status').textContent = '保存失败：' + e.message
+    }
+  })
+  function loadApiKeyConfig() {
+    const deepseekKey = localStorage.getItem('gs_deepseek_key') || ''
+    const kimiKey = localStorage.getItem('gs_kimi_key') || ''
+    if ($('gs-apikey-deepseek')) $('gs-apikey-deepseek').value = deepseekKey
+    if ($('gs-apikey-kimi')) $('gs-apikey-kimi').value = kimiKey
+    // 显示状态
+    if ($('gs-apikey-deepseek-status')) {
+      $('gs-apikey-deepseek-status').textContent = deepseekKey ? '✅ 已配置' : '未配置'
+      $('gs-apikey-deepseek-status').style.color = deepseekKey ? 'var(--accent)' : 'var(--text-muted)'
+    }
+    if ($('gs-apikey-kimi-status')) {
+      $('gs-apikey-kimi-status').textContent = kimiKey ? '✅ 已配置' : '未配置'
+      $('gs-apikey-kimi-status').style.color = kimiKey ? 'var(--accent)' : 'var(--text-muted)'
+    }
+  }
+
   // 导出 PDF
   $('gs-pdf-btn')?.addEventListener('click', exportPDF)
 
@@ -1197,6 +1243,9 @@ a { color: #5A6AAA !important; }`
     clearTimeout(saveDraftTimer)
     saveDraftTimer = setTimeout(saveDraft, 500)
   })
+
+  // 初始化 API Key 配置状态
+  loadApiKeyConfig()
 })
 
 /* ===== 粘贴图片 / Excel 表格 / HTML 智能检测 ===== */
