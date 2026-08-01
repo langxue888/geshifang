@@ -1132,8 +1132,12 @@ a { color: #5A6AAA !important; }`
   $('gs-ai-close')?.addEventListener('click', () => $('#gs-ai-modal')?.classList.add('gs-hidden'))
 
   // API Key 配置
-  $('gs-mode-badge')?.addEventListener('dblclick', () => {
-    // 双击模式徽章打开 API Key 配置
+  $('gs-mode-badge')?.addEventListener('click', () => {
+    // 点击模式徽章打开 API Key 配置
+    loadApiKeyConfig()
+    $('#gs-apikey-modal')?.classList.remove('gs-hidden')
+  })
+  $('gs-apikey-btn')?.addEventListener('click', () => {
     loadApiKeyConfig()
     $('#gs-apikey-modal')?.classList.remove('gs-hidden')
   })
