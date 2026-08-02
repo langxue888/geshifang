@@ -928,21 +928,24 @@ a { color: #5A6AAA !important; }`
     },
     nightgold: {
       label: '🌃 绅夜黄',
-      css: `/* 绅夜黄 — 深色夜幕、暖黄灯光、绅士格调 */
+      css: `/* 绅夜黄 — 绅夜君品牌风格 · 深色夜幕、暖黄灯光、绅士格调 */
 #gs-preview { background: #1A1410 !important; color: #E8DCC8 !important; }
-p { font-size: 15px; line-height: 1.9; color: #D4C8B0; }
-h1 { font-size: 23px; font-weight: 700; color: #F0C050; border-left: 4px solid #D4A030; padding-left: 14px; border-bottom: 1px solid #3A3028; }
-h2 { font-size: 19px; font-weight: 600; color: #E8B840; border-left: 3px solid #C89828; padding-left: 10px; }
+p { font-size: 15px; line-height: 2; color: #D4C8B0; letter-spacing: 0.3px; }
+h1 { font-size: 22px; font-weight: 700; color: #F0C050; border-left: 4px solid #D4A030; padding-left: 14px; border-bottom: 1px solid #3A3028; padding-bottom: 10px; margin: 28px 0 14px 0; letter-spacing: 1px; }
+h2 { font-size: 18px; font-weight: 600; color: #E8B840; border-left: 3px solid #C89828; padding-left: 10px; margin: 22px 0 10px 0; }
 h3 { font-size: 16px; font-weight: 600; color: #D4A838; }
-blockquote { background: #2A221C; border-left: 4px solid #D4A030; color: #C8B898; border-radius: 0 6px 6px 0; }
+blockquote { background: #2A221C; border-left: 4px solid #D4A030; color: #C8B898; border-radius: 0 6px 6px 0; font-style: italic; }
 pre { background: #2A221C; border: 1px solid #3A3028; border-radius: 6px; color: #D4C8B0; }
 code { background: #2A221C; color: #F0C050; }
+strong { color: #F0C050 !important; }
 th { background: #3A3028 !important; color: #F0C050 !important; }
 td { border-color: #3A3028; color: #D4C8B0; }
 tbody tr:nth-child(even) td { background: #221C16; }
 table { border-color: #3A3028; }
 hr { border-top: 1px solid #3A3028; }
-a { color: #E8B840 !important; }`
+a { color: #E8B840 !important; }
+ul, ol { color: #D4C8B0; }
+li { color: #D4C8B0; }`
     }
   }
 
