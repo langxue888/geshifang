@@ -727,12 +727,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 
-  // 复制排版结果
+  /* ===== 将 CSS 模板样式转为内联样式（用于复制） ===== */
+function applyTemplateStylesToHTML() {
+  const container = document.createElement('div')
+  container.innerHTML = preview.innerHTML
+  const allElements = container.querySelectorAll('*')
+  allElements.forEach(el => {
+    // 在原始预览中找到对应元素
+    const previewEl = preview.querySelector(`#${el.id}`) || 
+      // 如果没 id，遍历匹配
+      Array.from(preview.querySelectorAll(el.tagName)).find(p => p.textContent === el.textContent)
+    if (previewEl) {
+      const computed = window.getComputedStyle(previewEl)
+      const style = el.getAttribute('style') || ''
+      const templateStyles = [
+        'color', 'background-color', 'font-size', 'font-weight', 'font-family',
+        'line-height', 'text-align', 'text-indent', 'letter-spacing',
+        'border-left', 'border-bottom', 'border-top', 'border-right',
+        'border-color', 'border-style', 'border-width',
+        'padding', 'padding-left', 'padding-right', 'padding-top', 'padding-bottom',
+        'margin', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom',
+        'background', 'border-radius', 'font-style', 'text-decoration',
+      ]
+      let extraStyles = ''
+      templateStyles.forEach(prop => {
+        const val = computed.getPropertyValue(prop)
+        if (val && val !== 'none' && val !== '0px' && !style.includes(prop)) {
+          extraStyles += `${prop}:${val};`
+        }
+      })
+      if (extraStyles) {
+        el.setAttribute('style', (style ? style + ';' : '') + extraStyles)
+      }
+    }
+  })
+  return container.innerHTML
+}
+
+// 复制排版结果（带模板样式）
   $('gs-copy-btn')?.addEventListener('click', () => {
     const html = preview.innerHTML
     if (!html || !html.trim()) { alert('暂无排版结果可复制'); return }
+    // 应用模板样式到 HTML
+    const styledHtml = applyTemplateStylesToHTML()
     const text = preview.textContent
-    const htmlBlob = new Blob([html], { type: 'text/html' })
+    const htmlBlob = new Blob([styledHtml], { type: 'text/html' })
     const textBlob = new Blob([text], { type: 'text/plain' })
     navigator.clipboard.write([
       new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob })
@@ -743,7 +782,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => btn.innerHTML = orig, 1500)
     }).catch(() => {
       // fallback: 传统方式
-      navigator.clipboard.writeText(html).then(() => {
+      navigator.clipboard.writeText(styledHtml).then(() => {
         const btn = $('gs-copy-btn')
         const orig = btn.innerHTML
         btn.innerHTML = '&#x2705; 已复制'
