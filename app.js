@@ -1313,6 +1313,45 @@ li { color: #D4C8B8; margin-bottom: 6px; }`
     }
   })
 
+  // 文章粘贴区 → 转为 Markdown
+  $('gs-raw-convert-btn')?.addEventListener('click', async () => {
+    const raw = $('#gs-raw-input')?.value?.trim()
+    if (!raw) { $('#gs-raw-status').textContent = '请先粘贴内容'; return }
+    const btn = $('gs-raw-convert-btn')
+    const orig = btn.textContent
+    btn.textContent = '转换中...'
+    btn.disabled = true
+    try {
+      // 检测是否为 HTML（简单判断）
+      const isHtml = /<[a-z][\s\S]*>/i.test(raw) && !/^[\s\S]{0,20}$/.test(raw)
+      let markdown = raw
+      if (isHtml) {
+        const { htmlToMarkdown } = await import('./utils/htmlToMarkdown.js')
+        markdown = htmlToMarkdown(raw)
+      }
+      // 写入 Markdown 编辑区
+      input.value = markdown
+      updateStats()
+      syncLineNumbers()
+      $('#gs-raw-status').textContent = `✅ 已转换，共 ${markdown.length} 字符`
+      $('#gs-raw-status').style.color = 'var(--accent)'
+      setTimeout(() => {
+        $('#gs-raw-status').textContent = ''
+        $('#gs-raw-status').style.color = ''
+      }, 3000)
+    } catch (e) {
+      $('#gs-raw-status').textContent = '转换失败：' + e.message
+      $('#gs-raw-status').style.color = '#E53E3E'
+    } finally {
+      btn.textContent = orig
+      btn.disabled = false
+    }
+  })
+  $('gs-raw-clear-btn')?.addEventListener('click', () => {
+    $('#gs-raw-input').value = ''
+    $('#gs-raw-status').textContent = ''
+  })
+
   // 生成目录
   $('gs-toc-btn')?.addEventListener('click', generateTOC)
 

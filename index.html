@@ -217,7 +217,7 @@
       flex: 1;
       min-height: 0;
       display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 2.5fr);
       gap: 0;
     }
 
@@ -228,6 +228,11 @@
     }
 
     .gs-panel-left {
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .gs-panel-mid {
       border-right: 1px solid var(--border);
       background: var(--surface);
     }
@@ -520,16 +525,31 @@
   <!-- ===== 主区域 ===== -->
   <main class="gs-main">
 
-    <!-- ===== 左栏：编辑区 ===== -->
+    <!-- ===== 左栏：文章粘贴区 ===== -->
     <div class="gs-panel gs-panel-left">
       <div class="gs-panel-header">
+        文章粘贴区
+        <span class="text-xs font-normal text-gray-400">粘贴网页 / 文章内容</span>
+      </div>
+      <textarea id="gs-raw-input" class="gs-editor flex-1 scrollbar-thin"
+        placeholder="在此粘贴网页内容或文章原文...&#10;&#10;支持：HTML 网页内容、纯文本&#10;粘贴后点击「转为 Markdown」→ 自动转换到中间栏"></textarea>
+      <div style="padding:6px 10px;border-top:1px solid var(--border);display:flex;gap:6px;flex-shrink:0;">
+        <button id="gs-raw-convert-btn" class="gs-tb-btn" style="font-size:12px;padding:0 12px;height:30px;">&#x21E8; 转为 Markdown</button>
+        <button id="gs-raw-clear-btn" class="gs-tb-btn" style="font-size:12px;padding:0 10px;height:30px;">清空</button>
+        <span id="gs-raw-status" style="font-size:11px;color:var(--text-muted);align-self:center;margin-left:auto;"></span>
+      </div>
+    </div>
+
+    <!-- ===== 中栏：Markdown 区 ===== -->
+    <div class="gs-panel gs-panel-mid">
+      <div class="gs-panel-header">
         Markdown
-        <span class="text-xs font-normal text-gray-400">支持 GFM · 粘贴图片 · 粘贴 Excel · 网页转 Markdown · 导入 txt/html/md</span>
+        <span class="text-xs font-normal text-gray-400">支持 GFM · 粘贴图片 · 粘贴 Excel · 导入 txt/html/md</span>
       </div>
       <div class="gs-editor-wrap">
         <div id="gs-line-nums" class="gs-line-nums"></div>
         <textarea id="gs-input" class="gs-editor flex-1 scrollbar-thin"
-          placeholder="在此粘贴或输入 Markdown...&#10;&#10;支持：标题 / 列表 / 引用 / 表格 / 代码块 / 加粗 / 内联代码&#10;快捷键 Ctrl+S 一键排版"></textarea>
+          placeholder="在此编辑 Markdown...&#10;&#10;支持：标题 / 列表 / 引用 / 表格 / 代码块 / 加粗&#10;快捷键 Ctrl+S 一键排版"></textarea>
       </div>
     </div>
 
