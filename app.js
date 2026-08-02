@@ -925,6 +925,24 @@ td { border-color: #D8D8E4; }
 tbody tr:nth-child(even) td { background: #F6F6FA; }
 hr { border-top: 1px solid #D8D8E4; }
 a { color: #5A6AAA !important; }`
+    },
+    nightgold: {
+      label: '🌃 绅夜黄',
+      css: `/* 绅夜黄 — 深色夜幕、暖黄灯光、绅士格调 */
+#gs-preview { background: #1A1410 !important; color: #E8DCC8 !important; }
+p { font-size: 15px; line-height: 1.9; color: #D4C8B0; }
+h1 { font-size: 23px; font-weight: 700; color: #F0C050; border-left: 4px solid #D4A030; padding-left: 14px; border-bottom: 1px solid #3A3028; }
+h2 { font-size: 19px; font-weight: 600; color: #E8B840; border-left: 3px solid #C89828; padding-left: 10px; }
+h3 { font-size: 16px; font-weight: 600; color: #D4A838; }
+blockquote { background: #2A221C; border-left: 4px solid #D4A030; color: #C8B898; border-radius: 0 6px 6px 0; }
+pre { background: #2A221C; border: 1px solid #3A3028; border-radius: 6px; color: #D4C8B0; }
+code { background: #2A221C; color: #F0C050; }
+th { background: #3A3028 !important; color: #F0C050 !important; }
+td { border-color: #3A3028; color: #D4C8B0; }
+tbody tr:nth-child(even) td { background: #221C16; }
+table { border-color: #3A3028; }
+hr { border-top: 1px solid #3A3028; }
+a { color: #E8B840 !important; }`
     }
   }
 
