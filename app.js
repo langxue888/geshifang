@@ -15,16 +15,7 @@ window.openApiKeyConfig = function() {
   if (dkInput) dkInput.value = deepseekKey
   if (kmInput) kmInput.value = kimiKey
   // 更新状态显示
-  const dkStatus = document.getElementById('gs-apikey-deepseek-status')
-  const kmStatus = document.getElementById('gs-apikey-kimi-status')
-  if (dkStatus) {
-    dkStatus.textContent = deepseekKey ? '✅ 已配置' : '未配置'
-    dkStatus.style.color = deepseekKey ? 'var(--accent)' : 'var(--text-muted)'
-  }
-  if (kmStatus) {
-    kmStatus.textContent = kimiKey ? '✅ 已配置' : '未配置'
-    kmStatus.style.color = kimiKey ? 'var(--accent)' : 'var(--text-muted)'
-  }
+  updateApiKeyStatusDisplay()
   modal.classList.remove('gs-hidden')
 }
 
@@ -41,16 +32,7 @@ window.saveApiKeyConfig = function() {
       status.style.color = '#07C160'
     }
     // 更新状态显示
-    const dkStatus = document.getElementById('gs-apikey-deepseek-status')
-    const kmStatus = document.getElementById('gs-apikey-kimi-status')
-    if (dkStatus) {
-      dkStatus.textContent = deepseekKey ? '✅ 已配置' : '未配置'
-      dkStatus.style.color = deepseekKey ? '#07C160' : '#999'
-    }
-    if (kmStatus) {
-      kmStatus.textContent = kimiKey ? '✅ 已配置' : '未配置'
-      kmStatus.style.color = kimiKey ? '#07C160' : '#999'
-    }
+    updateApiKeyStatusDisplay()
     setTimeout(() => {
       if (status) status.textContent = ''
       document.getElementById('gs-apikey-modal')?.classList.add('gs-hidden')
@@ -58,6 +40,97 @@ window.saveApiKeyConfig = function() {
   } catch (e) {
     const status = document.getElementById('gs-apikey-status')
     if (status) status.textContent = '保存失败：' + e.message
+  }
+}
+
+/* ===== 测试 API Key 连接 ===== */
+window.testApiKey = async function(modelId) {
+  const input = document.getElementById(`gs-apikey-${modelId}`)
+  const btn = document.getElementById(`gs-apikey-${modelId}-test`)
+  const status = document.getElementById(`gs-apikey-${modelId}-status`)
+  const key = input?.value?.trim()
+  
+  if (!key) {
+    if (status) { status.textContent = '⚠️ 请先输入 API Key'; status.style.color = '#E53E3E' }
+    return
+  }
+  
+  // 按钮状态
+  const origText = btn.textContent
+  btn.textContent = '测试中...'
+  btn.disabled = true
+  if (status) { status.textContent = '⏳ 正在连接...'; status.style.color = 'var(--text-muted)' }
+  
+  try {
+    const apiUrl = modelId === 'kimi' 
+      ? 'https://api.moonshot.cn/v1/chat/completions'
+      : 'https://api.deepseek.com/v1/chat/completions'
+    const modelName = modelId === 'kimi' ? 'moonshot-v1-8k' : 'deepseek-chat'
+    
+    const startTime = Date.now()
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: modelName,
+        messages: [
+          { role: 'user', content: 'hi' }
+        ],
+        max_tokens: 5,
+        temperature: 0.1,
+      }),
+    })
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1)
+    
+    if (res.ok) {
+      if (status) {
+        status.textContent = `✅ 连接成功 (${elapsed}s)`
+        status.style.color = '#07C160'
+      }
+    } else if (res.status === 401) {
+      if (status) {
+        status.textContent = '❌ Key 无效或已过期'
+        status.style.color = '#E53E3E'
+      }
+    } else if (res.status === 429) {
+      if (status) {
+        status.textContent = '⚠️ 请求过于频繁，请稍后重试'
+        status.style.color = '#DD6B20'
+      }
+    } else {
+      const errData = await res.json().catch(() => ({}))
+      if (status) {
+        status.textContent = `❌ 错误 (${res.status}): ${errData.error?.message || '请求失败'}`
+        status.style.color = '#E53E3E'
+      }
+    }
+  } catch (e) {
+    if (status) {
+      status.textContent = `❌ 网络错误: ${e.message}`
+      status.style.color = '#E53E3E'
+    }
+  } finally {
+    btn.textContent = origText
+    btn.disabled = false
+  }
+}
+
+/* ===== 更新 API Key 状态显示 ===== */
+function updateApiKeyStatusDisplay() {
+  const deepseekKey = localStorage.getItem('gs_deepseek_key') || ''
+  const kimiKey = localStorage.getItem('gs_kimi_key') || ''
+  const dkStatus = document.getElementById('gs-apikey-deepseek-status')
+  const kmStatus = document.getElementById('gs-apikey-kimi-status')
+  if (dkStatus) {
+    dkStatus.textContent = deepseekKey ? '✅ 已配置' : '未配置'
+    dkStatus.style.color = deepseekKey ? '#07C160' : '#999'
+  }
+  if (kmStatus) {
+    kmStatus.textContent = kimiKey ? '✅ 已配置' : '未配置'
+    kmStatus.style.color = kimiKey ? '#07C160' : '#999'
   }
 }
 
@@ -1306,6 +1379,7 @@ li { color: #D4C8B8; margin-bottom: 6px; }`
       localStorage.setItem('gs_kimi_key', kimiKey || '')
       $('#gs-apikey-status').textContent = '✅ 已保存到本地'
       $('#gs-apikey-status').style.color = 'var(--accent)'
+      updateApiKeyStatusDisplay()
       setTimeout(() => {
         $('#gs-apikey-status').textContent = ''
         $('#gs-apikey-modal')?.classList.add('gs-hidden')
@@ -1314,6 +1388,9 @@ li { color: #D4C8B8; margin-bottom: 6px; }`
       $('#gs-apikey-status').textContent = '保存失败：' + e.message
     }
   })
+  // 测试连接按钮
+  $('gs-apikey-deepseek-test')?.addEventListener('click', () => window.testApiKey('deepseek'))
+  $('gs-apikey-kimi-test')?.addEventListener('click', () => window.testApiKey('kimi'))
 
   // 导出 PDF
   $('gs-pdf-btn')?.addEventListener('click', exportPDF)
