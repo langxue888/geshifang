@@ -729,38 +729,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== 将 CSS 模板样式转为内联样式（用于复制） ===== */
 function applyTemplateStylesToHTML() {
+  // 克隆预览内容
   const container = document.createElement('div')
   container.innerHTML = preview.innerHTML
-  const allElements = container.querySelectorAll('*')
-  allElements.forEach(el => {
-    // 在原始预览中找到对应元素
-    const previewEl = preview.querySelector(`#${el.id}`) || 
-      // 如果没 id，遍历匹配
-      Array.from(preview.querySelectorAll(el.tagName)).find(p => p.textContent === el.textContent)
-    if (previewEl) {
-      const computed = window.getComputedStyle(previewEl)
-      const style = el.getAttribute('style') || ''
-      const templateStyles = [
-        'color', 'background-color', 'font-size', 'font-weight', 'font-family',
-        'line-height', 'text-align', 'text-indent', 'letter-spacing',
-        'border-left', 'border-bottom', 'border-top', 'border-right',
-        'border-color', 'border-style', 'border-width',
-        'padding', 'padding-left', 'padding-right', 'padding-top', 'padding-bottom',
-        'margin', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom',
-        'background', 'border-radius', 'font-style', 'text-decoration',
-      ]
-      let extraStyles = ''
-      templateStyles.forEach(prop => {
-        const val = computed.getPropertyValue(prop)
-        if (val && val !== 'none' && val !== '0px' && !style.includes(prop)) {
+  
+  // 递归遍历两个 DOM 树，按位置匹配元素
+  function copyStyles(srcEl, dstEl) {
+    if (!srcEl || !dstEl || srcEl.nodeType !== 1) return
+    
+    const computed = window.getComputedStyle(srcEl)
+    const existingStyle = dstEl.getAttribute('style') || ''
+    
+    const styleProps = [
+      'color', 'background-color', 'background', 'font-size', 'font-weight', 'font-family',
+      'line-height', 'text-align', 'text-indent', 'letter-spacing',
+      'border-left', 'border-left-color', 'border-left-style', 'border-left-width',
+      'border-bottom', 'border-bottom-color', 'border-bottom-style', 'border-bottom-width',
+      'border-top', 'border-right',
+      'padding', 'padding-left', 'padding-right', 'padding-top', 'padding-bottom',
+      'margin', 'margin-left', 'margin-right', 'margin-top', 'margin-bottom',
+      'border-radius', 'border-collapse', 'border-spacing',
+      'font-style', 'text-decoration', 'text-transform',
+      'display', 'vertical-align',
+    ]
+    
+    let extraStyles = ''
+    styleProps.forEach(prop => {
+      const val = computed.getPropertyValue(prop)
+      // 跳过默认值和零值
+      if (val && val !== 'none' && val !== '0px' && val !== '0' && 
+          val !== 'normal' && val !== 'initial' && !val.startsWith('-webkit')) {
+        // 如果元素已有该属性的内联样式，跳过
+        const propInStyle = new RegExp(`${prop}\\s*:`, 'i')
+        if (!propInStyle.test(existingStyle)) {
           extraStyles += `${prop}:${val};`
         }
-      })
-      if (extraStyles) {
-        el.setAttribute('style', (style ? style + ';' : '') + extraStyles)
       }
+    })
+    
+    if (extraStyles) {
+      dstEl.setAttribute('style', (existingStyle ? existingStyle + ';' : '') + extraStyles)
     }
-  })
+    
+    // 递归处理子元素
+    for (let i = 0; i < Math.min(srcEl.children.length, dstEl.children.length); i++) {
+      copyStyles(srcEl.children[i], dstEl.children[i])
+    }
+  }
+  
+  // 从根节点开始复制样式
+  copyStyles(preview, container)
+  
   return container.innerHTML
 }
 
