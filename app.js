@@ -946,6 +946,28 @@ hr { border-top: 1px solid #3A3028; }
 a { color: #E8B840 !important; }
 ul, ol { color: #D4C8B0; }
 li { color: #D4C8B0; }`
+    },
+    shenye: {
+      label: '🎩 绅夜君',
+      css: `/* 绅夜君 — 绅夜君品牌专属 · 民国复古 · 深夜绅士 · 情感叙事 */
+#gs-preview { background: #0F0A0A !important; color: #E6DDD0 !important; }
+p { font-size: 16px; line-height: 2.1; color: #D4C8B8; letter-spacing: 0.5px; text-indent: 2em; margin: 0 0 0.8em 0; }
+h1 { font-size: 22px; font-weight: 700; color: #D4A85A; text-align: center; border: none; padding: 16px 0 10px 0; margin: 20px 0 16px 0; letter-spacing: 3px; border-bottom: 1px solid #2A1F18; }
+h1::before { content: "◈ "; font-size: 14px; color: #B8904A; } h1::after { content: " ◈"; font-size: 14px; color: #B8904A; }
+h2 { font-size: 18px; font-weight: 600; color: #C8A050; border-left: 3px solid #8A6A3A; padding-left: 12px; margin: 20px 0 10px 0; letter-spacing: 1px; }
+h3 { font-size: 16px; font-weight: 500; color: #B89848; }
+blockquote { background: #181210; border-left: 3px solid #8A6A3A; padding: 14px 18px; margin: 16px 0; border-radius: 0 4px 4px 0; color: #C8B898; font-style: italic; font-size: 15px; line-height: 2; }
+strong { color: #D4A85A !important; font-weight: 600; }
+pre { background: #181210; border: 1px solid #2A1F18; border-radius: 4px; padding: 14px 16px; }
+code { background: #181210; color: #C8A050; }
+th { background: #1A1410 !important; color: #D4A85A !important; font-weight: 500; letter-spacing: 1px; }
+td { border-color: #2A1F18; color: #D4C8B8; padding: 10px 14px; }
+tbody tr:nth-child(even) td { background: #120E0C; }
+table { border-color: #2A1F18; border-radius: 4px; }
+hr { border: none; border-top: 1px solid #2A1F18; margin: 24px 0; }
+a { color: #C8A050 !important; text-decoration: none; border-bottom: 1px solid #3A2A18; }
+ul, ol { color: #D4C8B8; padding-left: 1.8em; }
+li { color: #D4C8B8; margin-bottom: 6px; }`
     }
   }
 
